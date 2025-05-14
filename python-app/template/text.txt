@@ -1,4 +1,0 @@
-Him this is thest file
-
-The app's name is: ${{values.app_name}}
-The app's emv is: ${{values.app_env}}
