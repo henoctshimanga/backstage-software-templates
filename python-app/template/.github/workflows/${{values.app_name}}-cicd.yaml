@@ -5,7 +5,7 @@ on:
     pathes:
       - src/**
     branches:
-      - master
+      - main
 
 jobs:
   ci:
