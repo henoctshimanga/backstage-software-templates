@@ -67,7 +67,28 @@ jobs:
           sudo mv ./argocd /usr/local/bin/argocd
 
 
-      - name: Argocd syn app
+      - name: Ensure argocd repo and app
+        shell: bash
+        run: |
+
+          # Connects the argocd repo
+          repo="https://github.com/orgs/henoc-tshims/${{values.app_name}}.git"
+          argocd repo list | grep -q $repo || argocd repo add $repo
+
+          # Creates the argocd app_name
+          argocd app get ${{values.app_name}} || argocd app create \
+            ${{values.app_name}} \
+            --repo $repo \
+            --path charts/${{values.app_name}} \
+            --dest-namespace ${{values.app_env}} \
+            --dest-server https://kubernetes.default.svc \
+            --values values-${{values.app_env}}.yaml \
+            --revision main \
+            --sync-policy manual \
+            --sync-option CreateNamespace=true          
+
+
+      - name: Argocd app sync
         shell: bash
         run: |
           argocd login argocd-server.argocd \
@@ -77,3 +98,4 @@ jobs:
             --password ${{ '${{ secrets.ARGOCD_PASSWORD }}' }}
 
           argocd app sync ${{values.app_name}}
+          argocd app wait ${{values.app_name}} --timeout 180
